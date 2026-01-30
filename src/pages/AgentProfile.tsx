@@ -33,6 +33,8 @@ export function AgentProfile() {
 
   const [editingBio, setEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState(agent?.bio ?? "");
+  const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
+  const [quoteDraft, setQuoteDraft] = useState({ quote: "", clientName: "" });
 
   if (!agent) {
     return (
@@ -92,13 +94,26 @@ export function AgentProfile() {
                 alt={headshot.caption ?? "Headshot"}
                 className="w-32 h-32 object-cover rounded-lg border border-[#e8e8e8]"
               />
-              <input
-                type="text"
-                value={headshot.caption ?? ""}
-                onChange={(e) => roster.updateAgentPhoto(headshot.id, { caption: e.target.value })}
-                placeholder="Caption"
-                className="mt-3 w-full text-sm border border-[#e8e8e8] rounded-lg px-3 py-2 text-[#3e4543]"
-              />
+              <p className="text-xs text-[#6b7270] mt-2">Recommended: 400×400px, JPG or PNG, max 2MB</p>
+              <label className="mt-3 inline-flex items-center gap-2 px-3 py-2 border border-[#e8e8e8] rounded-lg text-sm text-[#3e4543] hover:border-[#832238]/30 cursor-pointer transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Upload new photo
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      roster.updateAgentPhoto(headshot.id, { url });
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </label>
             </div>
           )}
           {banner && (
@@ -109,13 +124,26 @@ export function AgentProfile() {
                 alt={banner.caption ?? "Banner"}
                 className="w-full h-40 object-cover rounded-lg border border-[#e8e8e8]"
               />
-              <input
-                type="text"
-                value={banner.caption ?? ""}
-                onChange={(e) => roster.updateAgentPhoto(banner.id, { caption: e.target.value })}
-                placeholder="Caption"
-                className="mt-3 w-full text-sm border border-[#e8e8e8] rounded-lg px-3 py-2 text-[#3e4543]"
-              />
+              <p className="text-xs text-[#6b7270] mt-2">Recommended: 1200×400px, JPG or PNG, max 2MB</p>
+              <label className="mt-3 inline-flex items-center gap-2 px-3 py-2 border border-[#e8e8e8] rounded-lg text-sm text-[#3e4543] hover:border-[#832238]/30 cursor-pointer transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Upload new photo
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      roster.updateAgentPhoto(banner.id, { url });
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </label>
             </div>
           )}
         </div>
@@ -208,28 +236,86 @@ export function AgentProfile() {
 
       {/* Client quotes */}
       <Card title="Client quotes">
-        {quotes.length === 0 ? (
-          <p className="text-[#6b7270] text-sm">No quotes yet.</p>
-        ) : (
-          <ul className="space-y-6">
-            {quotes.map((q) => (
-              <li key={q.id} className="border-l-2 border-[#e8e8e8] pl-5">
-                <p className="text-[#3e4543] italic leading-relaxed">&ldquo;{q.quote}&rdquo;</p>
-                <p className="text-sm text-[#6b7270] mt-2">
-                  — {q.clientName ?? q.clientInitials ?? "Client"}
-                  {q.saleType && ` (${q.saleType})`}
-                </p>
-                <input
-                  type="text"
-                  value={q.quote}
-                  onChange={(e) => roster.updateClientQuote(q.id, { quote: e.target.value })}
-                  className="mt-3 w-full text-sm border border-[#e8e8e8] rounded px-3 py-2 text-[#3e4543]"
-                  placeholder="Edit quote"
-                />
+        <ul className="space-y-6">
+          {quotes.map((q) => {
+            const isEditing = editingQuoteId === q.id;
+            const displayName = q.clientName ?? q.clientInitials ?? "Client";
+            const attribution = `${displayName}${q.saleType ? ` (${q.saleType})` : ""}`;
+
+            return (
+              <li key={q.id} className="border-l-2 border-[#e8e8e8] pl-5 flex gap-4">
+                <div className="flex-1 min-w-0">
+                  {isEditing ? (
+                    <div>
+                      <textarea
+                        value={quoteDraft.quote}
+                        onChange={(e) => setQuoteDraft((d) => ({ ...d, quote: e.target.value }))}
+                        rows={2}
+                        className="w-full text-sm border border-[#e8e8e8] rounded-lg px-3 py-2 text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] resize-none"
+                        placeholder="Quote"
+                      />
+                      <input
+                        type="text"
+                        value={quoteDraft.clientName}
+                        onChange={(e) => setQuoteDraft((d) => ({ ...d, clientName: e.target.value }))}
+                        className="mt-3 w-full text-sm border border-[#e8e8e8] rounded-lg px-3 py-2 text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238]"
+                        placeholder="Client name"
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            roster.updateClientQuote(q.id, { quote: quoteDraft.quote, clientName: quoteDraft.clientName || undefined });
+                            setEditingQuoteId(null);
+                          }}
+                          className="px-4 py-2 bg-[#832238] text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingQuoteId(null);
+                          }}
+                          className="px-4 py-2 border border-[#e8e8e8] text-[#3e4543] text-sm rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-[#3e4543] italic leading-relaxed">&ldquo;{q.quote}&rdquo;</p>
+                      <p className="text-sm text-[#6b7270] mt-2">— {attribution}</p>
+                    </>
+                  )}
+                </div>
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingQuoteId(q.id);
+                      setQuoteDraft({ quote: q.quote, clientName: displayName });
+                    }}
+                    className="flex-shrink-0 self-start text-sm text-[#6b7270] hover:text-[#832238] transition-colors"
+                  >
+                    Edit
+                  </button>
+                )}
               </li>
-            ))}
-          </ul>
-        )}
+            );
+          })}
+        </ul>
+        <button
+          type="button"
+          onClick={() => roster.addClientQuote(agent.id, { quote: "", clientName: "" })}
+          className="mt-6 flex items-center gap-2 px-3 py-2 border border-dashed border-[#e8e8e8] rounded-lg text-sm text-[#6b7270] hover:border-[#832238]/30 hover:text-[#832238] transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add new quote
+        </button>
       </Card>
 
       {/* Recently sold */}

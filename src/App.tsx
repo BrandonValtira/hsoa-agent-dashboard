@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AgentRosterProvider } from "./store/AgentRosterContext";
 import { AuthProvider, useAuth } from "./store/AuthContext";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { DashboardLayout } from "./components/Layout/DashboardLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { AgentList } from "./pages/AgentList";
@@ -50,6 +51,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/*" element={<ProtectedRoutes />} />

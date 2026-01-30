@@ -72,18 +72,24 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <Card>
-          <p className="text-3xl font-bold text-[#3e4543]">{allAgents.length}</p>
-          <p className="text-sm text-[#6b7270] mt-1">Active agents</p>
-        </Card>
-        <Card>
-          <p className="text-3xl font-bold text-[#3e4543]">{Object.keys(offices).length}</p>
-          <p className="text-sm text-[#6b7270] mt-1">Offices</p>
-        </Card>
-        <Card>
-          <p className="text-3xl font-bold text-[#3e4543]">{Object.keys(brokerages).length}</p>
-          <p className="text-sm text-[#6b7270] mt-1">Brokerages</p>
-        </Card>
+        <Link to="/agents" className="block rounded-xl border border-[#e8e8e8] bg-white overflow-hidden hover:border-[#832238]/30 transition-colors">
+          <div className="p-4 md:p-6">
+            <p className="text-3xl font-bold text-[#3e4543]">{allAgents.length}</p>
+            <p className="text-sm text-[#6b7270] mt-1">Active agents</p>
+          </div>
+        </Link>
+        <Link to="/offices" className="block rounded-xl border border-[#e8e8e8] bg-white overflow-hidden hover:border-[#832238]/30 transition-colors">
+          <div className="p-4 md:p-6">
+            <p className="text-3xl font-bold text-[#3e4543]">{Object.keys(offices).length}</p>
+            <p className="text-sm text-[#6b7270] mt-1">Offices</p>
+          </div>
+        </Link>
+        <Link to="/brokerages" className="block rounded-xl border border-[#e8e8e8] bg-white overflow-hidden hover:border-[#832238]/30 transition-colors">
+          <div className="p-4 md:p-6">
+            <p className="text-3xl font-bold text-[#3e4543]">{Object.keys(brokerages).length}</p>
+            <p className="text-sm text-[#6b7270] mt-1">Brokerages</p>
+          </div>
+        </Link>
       </div>
 
       <Card title="Agents">

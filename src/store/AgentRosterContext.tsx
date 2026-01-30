@@ -21,6 +21,7 @@ interface AgentRosterContextValue extends AgentRosterStore {
   updateAgent: (id: string, patch: Partial<Agent>) => void;
   updateAgentPhoto: (id: string, patch: Partial<AgentPhoto>) => void;
   updateClientQuote: (id: string, patch: Partial<ClientQuote>) => void;
+  addClientQuote: (agentId: string, data: Pick<ClientQuote, "quote" | "clientName" | "clientInitials" | "saleType">) => void;
   updateSoldProperty: (id: string, patch: Partial<SoldProperty>) => void;
   getOffice: (id: string) => Office | undefined;
   getBrokerage: (id: string) => Brokerage | undefined;
@@ -61,6 +62,26 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
       clientQuotes: {
         ...prev.clientQuotes,
         [id]: { ...prev.clientQuotes[id], ...patch } as ClientQuote,
+      },
+    }));
+  }, []);
+
+  const addClientQuote = useCallback((agentId: string, data: Pick<ClientQuote, "quote" | "clientName" | "clientInitials" | "saleType">) => {
+    const id = `quote-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const newQuote: ClientQuote = {
+      id,
+      agentId,
+      quote: data.quote || "",
+      clientName: data.clientName,
+      clientInitials: data.clientInitials,
+      saleType: data.saleType,
+      createdAt: new Date().toISOString(),
+    };
+    setStore((prev) => ({
+      ...prev,
+      clientQuotes: {
+        ...prev.clientQuotes,
+        [id]: newQuote,
       },
     }));
   }, []);
@@ -123,6 +144,7 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
       updateAgent,
       updateAgentPhoto,
       updateClientQuote,
+      addClientQuote,
       updateSoldProperty,
       getOffice,
       getBrokerage,
@@ -136,6 +158,7 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
       updateAgent,
       updateAgentPhoto,
       updateClientQuote,
+      addClientQuote,
       updateSoldProperty,
       getOffice,
       getBrokerage,
