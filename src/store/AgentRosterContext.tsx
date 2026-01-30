@@ -13,6 +13,7 @@ import type {
   ClientQuote,
   SoldProperty,
   Office,
+  Brokerage,
 } from "../types/model";
 import { mockStore } from "../data/mockData";
 
@@ -22,6 +23,7 @@ interface AgentRosterContextValue extends AgentRosterStore {
   updateClientQuote: (id: string, patch: Partial<ClientQuote>) => void;
   updateSoldProperty: (id: string, patch: Partial<SoldProperty>) => void;
   getOffice: (id: string) => Office | undefined;
+  getBrokerage: (id: string) => Brokerage | undefined;
   getAgentPhotos: (agentId: string) => AgentPhoto[];
   getClientQuotes: (agentId: string) => ClientQuote[];
   getSoldProperties: (agentId: string) => SoldProperty[];
@@ -78,6 +80,11 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
     [store.offices]
   );
 
+  const getBrokerage = useCallback(
+    (id: string) => store.brokerages[id],
+    [store.brokerages]
+  );
+
   const getAgentPhotos = useCallback(
     (agentId: string) =>
       Object.values(store.agentPhotos)
@@ -118,6 +125,7 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
       updateClientQuote,
       updateSoldProperty,
       getOffice,
+      getBrokerage,
       getAgentPhotos,
       getClientQuotes,
       getSoldProperties,
@@ -130,6 +138,7 @@ export function AgentRosterProvider({ children }: { children: ReactNode }) {
       updateClientQuote,
       updateSoldProperty,
       getOffice,
+      getBrokerage,
       getAgentPhotos,
       getClientQuotes,
       getSoldProperties,

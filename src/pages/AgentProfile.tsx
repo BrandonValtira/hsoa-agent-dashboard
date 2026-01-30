@@ -25,6 +25,7 @@ export function AgentProfile() {
   const roster = useAgentRoster();
   const agent = id ? roster.agents[id] : undefined;
   const office = agent ? roster.getOffice(agent.officeId) : undefined;
+  const brokerage = agent ? roster.getBrokerage(agent.brokerageId) : undefined;
   const photos = agent ? roster.getAgentPhotos(agent.id) : [];
   const quotes = agent ? roster.getClientQuotes(agent.id) : [];
   const sold = agent ? roster.getSoldProperties(agent.id) : [];
@@ -71,8 +72,11 @@ export function AgentProfile() {
             {agent.firstName} {agent.lastName}
           </h1>
           <p className="text-[#3e4543] mt-1">{agent.title ?? "Agent"}</p>
+          {brokerage && (
+            <p className="text-sm text-[#6b7270] mt-2">{brokerage.name}</p>
+          )}
           {office && (
-            <p className="text-sm text-[#6b7270] mt-2">{office.name}</p>
+            <p className="text-sm text-[#6b7270] mt-0.5">{office.name}</p>
           )}
         </div>
       </div>
@@ -166,6 +170,23 @@ export function AgentProfile() {
           </div>
         )}
       </Card>
+
+      {/* Brokerage */}
+      {brokerage && (
+        <Card title="Brokerage">
+          <p className="font-medium text-[#3e4543]">{brokerage.name}</p>
+          {brokerage.website && (
+            <a
+              href={brokerage.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[#832238] hover:underline mt-2 inline-block"
+            >
+              Visit website
+            </a>
+          )}
+        </Card>
+      )}
 
       {/* Office */}
       {office && (

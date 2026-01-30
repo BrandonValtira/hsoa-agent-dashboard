@@ -12,9 +12,17 @@ export interface Organization {
   logoUrl?: string;
 }
 
+export interface Brokerage {
+  id: string;
+  organizationId: string;
+  name: string;
+  website?: string;
+}
+
 export interface Office {
   id: string;
   organizationId: string;
+  brokerageId: string;
   name: string;
   address?: string;
   city?: string;
@@ -26,6 +34,7 @@ export interface Office {
 
 export interface Agent {
   id: string;
+  brokerageId: string;
   officeId: string;
   firstName: string;
   lastName: string;
@@ -87,6 +96,7 @@ export interface AgentMetrics {
 /** Normalized store shape – one place to hold all entities */
 export interface AgentRosterStore {
   organizations: Record<string, Organization>;
+  brokerages: Record<string, Brokerage>;
   offices: Record<string, Office>;
   agents: Record<string, Agent>;
   agentPhotos: Record<string, AgentPhoto>;

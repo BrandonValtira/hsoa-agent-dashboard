@@ -1,6 +1,7 @@
 import type {
   AgentRosterStore,
   Organization,
+  Brokerage,
   Office,
   Agent,
   AgentPhoto,
@@ -15,32 +16,84 @@ const org: Organization = {
   slug: "hsoa",
 };
 
-const offices: Office[] = [
-  {
-    id: "office-1",
-    organizationId: "org-1",
-    name: "Downtown Office",
-    address: "100 Main Street",
-    city: "Austin",
-    state: "TX",
-    zip: "78701",
-    phone: "(512) 555-0100",
-    email: "downtown@hsoa.com",
-  },
-  {
-    id: "office-2",
-    organizationId: "org-1",
-    name: "North Office",
-    address: "5000 Research Blvd",
-    city: "Austin",
-    state: "TX",
-    zip: "78758",
-    phone: "(512) 555-0200",
-    email: "north@hsoa.com",
-  },
+// All HSoA brokerages from https://www.homeservices.com/brokerage
+const brokeragesList: Omit<Brokerage, "id">[] = [
+  { organizationId: "org-1", name: "Allie Beth Allman & Associates", website: "https://www.alliebeth.com" },
+  { organizationId: "org-1", name: "ReeceNichols", website: "https://www.reecenichols.com" },
+  { organizationId: "org-1", name: "BHHS Ambassador Real Estate", website: "https://www.bhhsamb.com" },
+  { organizationId: "org-1", name: "BHHS Arizona California and Nevada Properties", website: "https://www.bhhs.com/arizona-properties-california-properties-and-nevada-properties-nv301" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Beach Properties of Florida", website: "https://www.beachpropertiesfla.com" },
+  { organizationId: "org-1", name: "Bennion Deville Homes", website: "https://www.bdhomes.com" },
+  { organizationId: "org-1", name: "Ebby Halliday Realtors", website: "https://www.ebby.com" },
+  { organizationId: "org-1", name: "Dave Perry Miller", website: "https://www.daveperrymiller.com" },
+  { organizationId: "org-1", name: "Edina Realty", website: "https://www.edinarealty.com" },
+  { organizationId: "org-1", name: "Long & Foster Real Estate", website: "https://www.longandfoster.com" },
+  { organizationId: "org-1", name: "EWM Realty International", website: "https://www.ewm.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Florida Network Realty", website: "https://www.floridanetworkrealty.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Fox & Roach, Realtors", website: "https://www.foxroach.com" },
+  { organizationId: "org-1", name: "First Weber Realtors", website: "https://www.firstweber.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Georgia Properties", website: "https://www.bhhsgeorgia.com" },
+  { organizationId: "org-1", name: "Harry Norman Realtors", website: "https://www.harrynorman.com" },
+  { organizationId: "org-1", name: "Hegg Realtors", website: "https://www.hegg.com" },
+  { organizationId: "org-1", name: "HOME Real Estate", website: "https://www.homerealestate.com" },
+  { organizationId: "org-1", name: "Houlihan Lawrence", website: "https://www.houlihanlawrence.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Hudson Valley Properties", website: "https://www.bhhshudsonvalley.com" },
+  { organizationId: "org-1", name: "Huff Realty", website: "https://www.huff.com" },
+  { organizationId: "org-1", name: "Intero Real Estate Services", website: "https://www.interorealestate.com" },
+  { organizationId: "org-1", name: "Kentwood Real Estate", website: "https://www.denverrealestate.com" },
+  { organizationId: "org-1", name: "Iowa Realty", website: "https://www.iowarealty.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Chicago", website: "https://www.bhhschicago.com" },
+  { organizationId: "org-1", name: "Long Realty", website: "https://www.longrealty.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices California Properties", website: "https://bhhscalifornia.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Carolinas Realty", website: "https://www.bhhscarolinas.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Florida Realty", website: "https://www.bhhsfloridarealty.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Yost and Little", website: "https://www.bhhsysu.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices Pinehurst Realty Group", website: "https://www.bhhsprg.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices New England", website: "https://www.bhhsneproperties.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices New York Properties", website: "https://www.bhhsnyproperties.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices First Realty", website: "https://www.bhhsfirstrealty.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices NW Real Estate", website: "https://www.bhhsnw.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway Real Estate Professionals", website: "https://www.bhhsrep.com" },
+  { organizationId: "org-1", name: "Berkshire Hathaway HomeServices York Simpson Underwood", website: "https://www.bhhsysu.com" },
+  { organizationId: "org-1", name: "Northrop Realty", website: "https://www.northroprealty.com" },
+  { organizationId: "org-1", name: "Realty South", website: "https://www.realtysouth.com" },
+  { organizationId: "org-1", name: "Rector Hayden Realtors", website: "https://www.rhr.com" },
+  { organizationId: "org-1", name: "Roberts Brothers", website: "https://www.robertsbrothers.com" },
+  { organizationId: "org-1", name: "Semonin Realtors", website: "https://www.semonin.com" },
+  { organizationId: "org-1", name: "Williams Trew", website: "https://www.williamstrew.com" },
+  { organizationId: "org-1", name: "Woods Bros Realty", website: "https://www.woodsbros.com" },
 ];
 
-const agentTemplates: Omit<Agent, "id">[] = [
+const brokerages: Brokerage[] = brokeragesList.map((b, i) => ({ ...b, id: `brokerage-${i + 1}` }));
+
+const offices: Office[] = [
+  { id: "office-1", organizationId: "org-1", brokerageId: "brokerage-1", name: "Downtown Office", address: "100 Main Street", city: "Austin", state: "TX", zip: "78701", phone: "(512) 555-0100", email: "downtown@hsoa.com" },
+  { id: "office-2", organizationId: "org-1", brokerageId: "brokerage-2", name: "North Office", address: "5000 Research Blvd", city: "Austin", state: "TX", zip: "78758", phone: "(512) 555-0200", email: "north@hsoa.com" },
+  { id: "office-3", organizationId: "org-1", brokerageId: "brokerage-3", name: "South Austin Office", address: "4200 S Lamar Blvd", city: "Austin", state: "TX", zip: "78745", phone: "(512) 555-0300", email: "south@hsoa.com" },
+  { id: "office-4", organizationId: "org-1", brokerageId: "brokerage-4", name: "Round Rock Office", address: "1200 E Palm Valley Blvd", city: "Round Rock", state: "TX", zip: "78664", phone: "(512) 555-0400", email: "roundrock@hsoa.com" },
+  { id: "office-5", organizationId: "org-1", brokerageId: "brokerage-5", name: "Cedar Park Office", address: "801 E Whitestone Blvd", city: "Cedar Park", state: "TX", zip: "78613", phone: "(512) 555-0500", email: "cedarpark@hsoa.com" },
+  { id: "office-6", organizationId: "org-1", brokerageId: "brokerage-6", name: "Lakeway Office", address: "1912 Lohmans Crossing Rd", city: "Lakeway", state: "TX", zip: "78734", phone: "(512) 555-0600", email: "lakeway@hsoa.com" },
+  { id: "office-7", organizationId: "org-1", brokerageId: "brokerage-7", name: "East Austin Office", address: "1800 E 6th St", city: "Austin", state: "TX", zip: "78702", phone: "(512) 555-0700", email: "east@hsoa.com" },
+  { id: "office-8", organizationId: "org-1", brokerageId: "brokerage-8", name: "West Lake Hills Office", address: "700 Westlake Dr", city: "Austin", state: "TX", zip: "78746", phone: "(512) 555-0800", email: "westlake@hsoa.com" },
+  { id: "office-9", organizationId: "org-1", brokerageId: "brokerage-9", name: "Mueller Office", address: "1912 Aldrich St", city: "Austin", state: "TX", zip: "78723", phone: "(512) 555-0900", email: "mueller@hsoa.com" },
+  { id: "office-10", organizationId: "org-1", brokerageId: "brokerage-10", name: "Leander Office", address: "1395 US-183", city: "Leander", state: "TX", zip: "78641", phone: "(512) 555-1000", email: "leander@hsoa.com" },
+];
+
+// 25 agents: 2–3 per office. office-1:3, office-2:2, office-3:3, office-4:2, office-5:2, office-6:3, office-7:2, office-8:3, office-9:3, office-10:2
+const officeIdByAgentIndex = [
+  "office-1", "office-1", "office-1",
+  "office-2", "office-2",
+  "office-3", "office-3", "office-3",
+  "office-4", "office-4",
+  "office-5", "office-5",
+  "office-6", "office-6", "office-6",
+  "office-7", "office-7",
+  "office-8", "office-8", "office-8",
+  "office-9", "office-9", "office-9",
+  "office-10", "office-10",
+];
+
+const agentTemplates: Omit<Agent, "id" | "brokerageId">[] = [
   {
     officeId: "office-1",
     firstName: "Jordan",
@@ -368,10 +421,16 @@ const agentTemplates: Omit<Agent, "id">[] = [
   },
 ];
 
-const agents: Agent[] = agentTemplates.map((t, i) => ({
-  ...t,
-  id: `agent-${i + 1}`,
-}));
+const agents: Agent[] = agentTemplates.map((t, i) => {
+  const officeId = officeIdByAgentIndex[i];
+  const office = offices.find((o) => o.id === officeId)!;
+  return {
+    ...t,
+    id: `agent-${i + 1}`,
+    officeId,
+    brokerageId: office.brokerageId,
+  };
+});
 
 const headshotUrls = [
   "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
@@ -528,6 +587,7 @@ function toRecord<T extends { id: string }>(arr: T[]): Record<string, T> {
 
 export const mockStore: AgentRosterStore = {
   organizations: toRecord([org]),
+  brokerages: toRecord(brokerages),
   offices: toRecord(offices),
   agents: toRecord(agents),
   agentPhotos: toRecord(agentPhotos),
