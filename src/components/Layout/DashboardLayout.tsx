@@ -14,7 +14,13 @@ export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Scroll main content to top on route change
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
+  }, [location.pathname]);
   const { agents, getAgentPhotos } = useAgentRoster();
   const { user, logout } = useAuth();
   const firstAgent = Object.values(agents).find((a) => a.isActive);
@@ -156,7 +162,7 @@ export function DashboardLayout() {
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 px-6 py-10 md:px-10 md:py-12 md:ml-64 overflow-auto">
+        <main ref={mainRef} className="flex-1 min-w-0 px-4 py-8 md:px-10 md:py-12 md:ml-64 overflow-auto">
           <Outlet />
         </main>
       </div>

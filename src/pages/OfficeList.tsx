@@ -66,16 +66,16 @@ export function OfficeList() {
           </svg>
         </div>
         <div className="flex flex-wrap gap-3">
-          <div className="relative">
+          <div className="relative w-[220px] min-w-[220px] flex-shrink-0">
             <select
               value={brokerageFilter}
               onChange={(e) => setBrokerageFilter(e.target.value)}
-              className="appearance-none rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer"
+              className="appearance-none w-full rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer truncate"
               aria-label="Filter by brokerage"
             >
               <option value="">All brokerages</option>
               {brokerageList.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
+                <option key={b.id} value={b.id} title={b.name}>{b.name.length > 32 ? b.name.slice(0, 29) + "…" : b.name}</option>
               ))}
             </select>
             <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b7270] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">

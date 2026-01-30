@@ -1,12 +1,13 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAgentRoster } from "../store/AgentRosterContext";
 import { useDebounce } from "../hooks/useDebounce";
 import { Card } from "../components/Card";
 
+const PAGE_SIZE = 50;
+
 export function Dashboard() {
-  const { agents, offices, brokerages, getOffice, getBrokerage } = useAgentRoster();
+  const { agents, offices, brokerages, getOffice, getBrokerage, getAgentPhotos } = useAgentRoster();
   const [searchQuery, setSearchQuery] = useState("");
   const [brokerageFilter, setBrokerageFilter] = useState("");
   const [officeFilter, setOfficeFilter] = useState("");
@@ -53,14 +54,13 @@ export function Dashboard() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [offices, brokerageFilter, allAgents]);
 
-  // Virtualization for agent list
-  const parentRef = useRef<HTMLDivElement>(null);
-  const rowVirtualizer = useVirtualizer({
-    count: filteredAgents.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 72, // Estimated row height
-    overscan: 10,
-  });
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(filteredAgents.length / PAGE_SIZE);
+  const paginatedAgents = useMemo(
+    () => filteredAgents.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredAgents, page]
+  );
+  useEffect(() => setPage(1), [debouncedSearch, brokerageFilter, officeFilter]);
 
   const hasFilters = debouncedSearch.trim() || brokerageFilter || officeFilter;
 
@@ -108,30 +108,30 @@ export function Dashboard() {
             </svg>
           </div>
           <div className="flex flex-wrap gap-3">
-            <div className="relative">
+            <div className="relative w-[220px] min-w-[220px] flex-shrink-0">
               <select
                 value={brokerageFilter}
                 onChange={(e) => {
                   setBrokerageFilter(e.target.value);
                   setOfficeFilter("");
                 }}
-                className="appearance-none rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer"
+                className="appearance-none w-full rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer truncate"
                 aria-label="Refine by brokerage"
               >
                 <option value="">All brokerages</option>
                 {brokerageList.map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
+                  <option key={b.id} value={b.id} title={b.name}>{b.name.length > 32 ? b.name.slice(0, 29) + "…" : b.name}</option>
                 ))}
               </select>
               <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b7270] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
-            <div className="relative">
+            <div className="relative w-[220px] min-w-[220px] flex-shrink-0">
               <select
                 value={officeList.some((o) => o.id === officeFilter) ? officeFilter : ""}
                 onChange={(e) => setOfficeFilter(e.target.value)}
-                className="appearance-none rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer"
+                className="appearance-none w-full rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer truncate"
                 aria-label="Refine by office"
               >
                 <option value="">All offices{brokerageFilter ? " (this brokerage)" : ""}</option>
@@ -144,64 +144,84 @@ export function Dashboard() {
               </svg>
             </div>
           </div>
-          {hasFilters && (
+          {(hasFilters || filteredAgents.length > PAGE_SIZE) && (
             <p className="text-sm text-[#6b7270]">
-              Showing {filteredAgents.length} of {allAgents.length} agents
+              Showing {paginatedAgents.length} of {filteredAgents.length} agents
+              {hasFilters && ` (filtered from ${allAgents.length})`}
             </p>
           )}
 
-          {filteredAgents.length === 0 ? (
+          {paginatedAgents.length === 0 ? (
             <p className="py-8 text-center text-[#6b7270]">
               {hasFilters ? "No agents match your filters." : "No active agents."}
             </p>
           ) : (
-            <div
-              ref={parentRef}
-              className="h-[400px] overflow-auto"
-              style={{ contain: "strict" }}
-            >
-              <div
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
-                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                  const agent = filteredAgents[virtualRow.index];
-                  const office = getOffice(agent.officeId);
-                  const brokerage = getBrokerage(agent.brokerageId);
-                  return (
-                    <div
-                      key={virtualRow.key}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                    >
-                      <div className="py-4 border-b border-[#e8e8e8] last:border-b-0">
-                        <Link
-                          to={`/agents/${agent.id}`}
-                          className="flex flex-wrap items-center gap-2 text-[#3e4543] hover:text-[#832238] font-medium transition-colors"
-                        >
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {paginatedAgents.map((agent) => {
+                const office = getOffice(agent.officeId);
+                const brokerage = getBrokerage(agent.brokerageId);
+                const headshot = getAgentPhotos(agent.id).find((p) => p.type === "headshot");
+                return (
+                  <Link
+                    key={agent.id}
+                    to={`/agents/${agent.id}`}
+                    className="block rounded-xl border border-[#e8e8e8] bg-white p-6 hover:border-[#832238]/30 transition-all"
+                  >
+                    <div className="flex items-start gap-4">
+                      {headshot ? (
+                        <img
+                          src={headshot.url}
+                          alt=""
+                          className="h-14 w-14 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="h-14 w-14 rounded-full bg-[#e8e8e8] flex items-center justify-center text-[#3e4543] font-semibold flex-shrink-0">
+                          {agent.firstName[0]}
+                          {agent.lastName[0]}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-[#3e4543]">
                           {agent.firstName} {agent.lastName}
-                          {brokerage && (
-                            <span className="text-[#6b7270] font-normal text-sm">— {brokerage.name}</span>
-                          )}
-                          {office && (
-                            <span className="text-[#6b7270] font-normal text-sm">— {office.name}</span>
-                          )}
-                        </Link>
-                        <p className="text-sm text-[#6b7270] mt-1">{agent.email}</p>
+                        </p>
+                        {agent.title && (
+                          <p className="text-sm text-[#6b7270] mt-0.5">{agent.title}</p>
+                        )}
+                        {brokerage && (
+                          <p className="text-sm text-[#6b7270] mt-1">{brokerage.name}</p>
+                        )}
+                        {office && (
+                          <p className="text-sm text-[#6b7270] mt-0.5">{office.name}</p>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 rounded-lg border border-[#e8e8e8] text-sm text-[#3e4543] hover:border-[#832238]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-[#6b7270] px-4">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 rounded-lg border border-[#e8e8e8] text-sm text-[#3e4543] hover:border-[#832238]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
