@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Custom theme – brand colors and breakpoints */
+@theme {
+  /* Breakpoints (Tailwind defaults: sm=640, md=768, lg=1024, xl=1280, 2xl=1536) */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  /* Brand: maroon (use sparingly), gray (text), yellow (accent sparingly) */
+  --color-maroon: #832238;
+  --color-brand-gray: #3e4543;
+  --color-brand-yellow: #f3d04d;
+  /* Sidebar: dark gray */
+  --color-sidebar: #2a2e2d;
+  --color-sidebar-hover: #353a39;
+  /* UI */
+  --color-dashboard-bg: #ffffff;
+  --color-dashboard-border: #e8e8e8;
+  --color-dashboard-muted: #6b7270;
+}
+
+:root {
+  font-family: "Open Sans", system-ui, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: #3e4543;
+  background-color: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
