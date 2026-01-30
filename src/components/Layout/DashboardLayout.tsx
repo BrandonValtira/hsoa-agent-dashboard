@@ -5,6 +5,8 @@ import { useAgentRoster } from "../../store/AgentRosterContext";
 const nav = [
   { to: "/", label: "Dashboard" },
   { to: "/agents", label: "Agents" },
+  { to: "/brokerages", label: "Brokerages" },
+  { to: "/offices", label: "Offices" },
 ];
 
 export function DashboardLayout() {
