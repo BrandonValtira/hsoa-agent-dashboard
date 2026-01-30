@@ -21,7 +21,7 @@ export function DashboardLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Full-width top bar: unified height, light gray line under */}
-      <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#e8e8e8] bg-white px-4 md:px-6">
+      <header className="sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#e8e8e8] bg-white px-4 md:px-6">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
@@ -59,7 +59,7 @@ export function DashboardLayout() {
           <button
             type="button"
             aria-label="Close menu"
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            className="fixed inset-0 z-30 bg-black/50 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -67,7 +67,7 @@ export function DashboardLayout() {
         {/* Sidebar – dark gray, no logo (logo in top bar) */}
         <aside
           className={`
-            fixed md:static inset-y-0 left-0 z-50
+            fixed md:static inset-y-0 left-0 z-40
             w-64 flex-shrink-0
             bg-[#2a2e2d] text-white
             transform transition-transform duration-200 ease-out
