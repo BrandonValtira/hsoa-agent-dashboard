@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAgentRoster } from "../store/AgentRosterContext";
+import { useDebounce } from "../hooks/useDebounce";
 
 export function BrokerageList() {
   const { brokerages, agents, offices } = useAgentRoster();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 200);
 
   const allBrokerages = useMemo(
     () => Object.values(brokerages).sort((a, b) => a.name.localeCompare(b.name)),
@@ -12,10 +14,10 @@ export function BrokerageList() {
   );
 
   const filteredBrokerages = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     if (!q) return allBrokerages;
     return allBrokerages.filter((b) => b.name.toLowerCase().includes(q));
-  }, [allBrokerages, searchQuery]);
+  }, [allBrokerages, debouncedSearch]);
 
   const getAgentCount = (brokerageId: string) =>
     Object.values(agents).filter((a) => a.isActive && a.brokerageId === brokerageId).length;
@@ -51,7 +53,7 @@ export function BrokerageList() {
           </svg>
         </div>
 
-        {searchQuery.trim() && (
+        {debouncedSearch.trim() && (
           <p className="text-sm text-[#6b7270]">
             Showing {filteredBrokerages.length} of {allBrokerages.length} brokerages
           </p>
@@ -61,7 +63,7 @@ export function BrokerageList() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredBrokerages.length === 0 ? (
           <p className="col-span-full py-8 text-center text-[#6b7270]">
-            {searchQuery.trim() ? "No brokerages match your search." : "No brokerages found."}
+            {debouncedSearch.trim() ? "No brokerages match your search." : "No brokerages found."}
           </p>
         ) : (
           filteredBrokerages.map((brokerage) => {

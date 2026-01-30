@@ -1,12 +1,19 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAgentRoster } from "../store/AgentRosterContext";
+import { useDebounce } from "../hooks/useDebounce";
+
+const PAGE_SIZE = 50;
 
 export function AgentList() {
   const { agents, offices, brokerages, getOffice, getBrokerage, getAgentPhotos } = useAgentRoster();
   const [searchQuery, setSearchQuery] = useState("");
   const [brokerageFilter, setBrokerageFilter] = useState<string>("");
   const [officeFilter, setOfficeFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+
+  // Debounce search to avoid filtering on every keystroke
+  const debouncedSearch = useDebounce(searchQuery, 200);
 
   const allAgents = useMemo(
     () => Object.values(agents).filter((a) => a.isActive),
@@ -17,7 +24,7 @@ export function AgentList() {
     let list = allAgents;
     if (brokerageFilter) list = list.filter((a) => a.brokerageId === brokerageFilter);
     if (officeFilter) list = list.filter((a) => a.officeId === officeFilter);
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     if (!q) return list;
     return list.filter((agent) => {
       const office = getOffice(agent.officeId);
@@ -28,7 +35,18 @@ export function AgentList() {
       const brokerageName = (brokerage?.name ?? "").toLowerCase();
       return name.includes(q) || email.includes(q) || officeName.includes(q) || brokerageName.includes(q);
     });
-  }, [allAgents, brokerageFilter, officeFilter, searchQuery, getOffice, getBrokerage]);
+  }, [allAgents, brokerageFilter, officeFilter, debouncedSearch, getOffice, getBrokerage]);
+
+  // Reset page when filters change
+  useMemo(() => {
+    setPage(1);
+  }, [debouncedSearch, brokerageFilter, officeFilter]);
+
+  const totalPages = Math.ceil(filteredAgents.length / PAGE_SIZE);
+  const paginatedAgents = useMemo(
+    () => filteredAgents.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredAgents, page]
+  );
 
   const brokerageList = useMemo(
     () => Object.values(brokerages).sort((a, b) => a.name.localeCompare(b.name)),
@@ -47,8 +65,10 @@ export function AgentList() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [offices, brokerageFilter, allAgents]);
 
+  const hasFilters = debouncedSearch.trim() || brokerageFilter || officeFilter;
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-[#3e4543]">Agents</h1>
         <p className="text-[#3e4543] mt-2 text-[15px]">Select an agent to edit profile, photos, bio, and metrics</p>
@@ -75,49 +95,58 @@ export function AgentList() {
           </svg>
         </div>
         <div className="flex flex-wrap gap-3">
-          <select
-            value={brokerageFilter}
-            onChange={(e) => {
-              setBrokerageFilter(e.target.value);
-              setOfficeFilter("");
-            }}
-            className="rounded-lg border border-[#e8e8e8] px-4 py-3 max-w-[180px] text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white truncate h-[50px]"
-            aria-label="Refine by brokerage"
-            title={brokerageFilter ? brokerageList.find((b) => b.id === brokerageFilter)?.name : "All brokerages"}
-          >
-            <option value="">All brokerages</option>
-            {brokerageList.map((b) => (
-              <option key={b.id} value={b.id} title={b.name}>{b.name.length > 28 ? b.name.slice(0, 25) + "…" : b.name}</option>
-            ))}
-          </select>
-          <select
-            value={officeList.some((o) => o.id === officeFilter) ? officeFilter : ""}
-            onChange={(e) => setOfficeFilter(e.target.value)}
-            className="rounded-lg border border-[#e8e8e8] px-4 py-3 max-w-[180px] text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white truncate h-[50px]"
-            aria-label="Refine by office"
-            title={officeFilter ? officeList.find((o) => o.id === officeFilter)?.name : "All offices"}
-          >
-            <option value="">All offices{brokerageFilter ? " (this brokerage)" : ""}</option>
-            {officeList.map((office) => (
-              <option key={office.id} value={office.id} title={office.name}>{office.name.length > 28 ? office.name.slice(0, 25) + "…" : office.name}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={brokerageFilter}
+              onChange={(e) => {
+                setBrokerageFilter(e.target.value);
+                setOfficeFilter("");
+              }}
+              className="appearance-none rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer"
+              aria-label="Refine by brokerage"
+            >
+              <option value="">All brokerages</option>
+              {brokerageList.map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b7270] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <div className="relative">
+            <select
+              value={officeList.some((o) => o.id === officeFilter) ? officeFilter : ""}
+              onChange={(e) => setOfficeFilter(e.target.value)}
+              className="appearance-none rounded-lg border border-[#e8e8e8] pl-4 pr-10 py-3 text-base text-[#3e4543] focus:border-[#832238] focus:outline-none focus:ring-1 focus:ring-[#832238] bg-white h-[50px] cursor-pointer"
+              aria-label="Refine by office"
+            >
+              <option value="">All offices{brokerageFilter ? " (this brokerage)" : ""}</option>
+              {officeList.map((office) => (
+                <option key={office.id} value={office.id}>{office.name}</option>
+              ))}
+            </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b7270] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      {(searchQuery.trim() || brokerageFilter || officeFilter) && (
+      {(hasFilters || filteredAgents.length > PAGE_SIZE) && (
         <p className="text-sm text-[#6b7270]">
-          Showing {filteredAgents.length} of {allAgents.length} agents
+          Showing {paginatedAgents.length} of {filteredAgents.length} agents
+          {hasFilters && ` (filtered from ${allAgents.length})`}
         </p>
       )}
 
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredAgents.length === 0 ? (
-          <p className="col-span-full py-8 text-center text-[#6b7270]">
-            {searchQuery.trim() || brokerageFilter || officeFilter ? "No agents match your filters." : "No active agents."}
-          </p>
-        ) : (
-          filteredAgents.map((agent) => {
+      {paginatedAgents.length === 0 ? (
+        <p className="py-8 text-center text-[#6b7270]">
+          {hasFilters ? "No agents match your filters." : "No active agents."}
+        </p>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedAgents.map((agent) => {
             const office = getOffice(agent.officeId);
             const brokerage = getBrokerage(agent.brokerageId);
             const headshot = getAgentPhotos(agent.id).find((p) => p.type === "headshot");
@@ -157,9 +186,34 @@ export function AgentList() {
                 </div>
               </Link>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 rounded-lg border border-[#e8e8e8] text-sm text-[#3e4543] hover:border-[#832238]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-[#6b7270] px-4">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 rounded-lg border border-[#e8e8e8] text-sm text-[#3e4543] hover:border-[#832238]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
